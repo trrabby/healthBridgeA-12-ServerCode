@@ -87,22 +87,34 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // const database = client.db("BloggingVoyage");
-    // const itemCollection = database.collection("Blogs");
-    // const itemCollection2 = database.collection("wishListBlogs")
+    const database = client.db("HealthBridge");
+    const itemCollection = database.collection("Users");
+    const itemCollection2 = database.collection("Camps")
     // const itemCollection3 = database.collection("comments")
 
-    // app.get('/blogs', async (req, res) => {
-    //   const cursor = itemCollection.find()
-    //   try {
-    //     const result = await cursor.toArray();
-    //     res.send(result)
-    //   }
-    //   catch (error) {
-    //     console.log(error)
-    //   }
+    app.post('/camps', async (req, res) => {
+      const item = req.body;
+      
+      try {
+        const result = await itemCollection2.insertOne(item);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+    });
 
-    // })
+    app.get('/camps', async (req, res) => {
+      const cursor = itemCollection2.find()
+      try {
+        const result = await cursor.toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
