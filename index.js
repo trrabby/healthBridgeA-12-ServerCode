@@ -90,7 +90,7 @@ async function run() {
     const database = client.db("HealthBridge");
     const itemCollection = database.collection("Users");
     const itemCollection2 = database.collection("Camps")
-    // const itemCollection3 = database.collection("comments")
+    const itemCollection3 = database.collection("regCamps")
 
     app.post('/camps', async (req, res) => {
       const item = req.body;
@@ -115,6 +115,103 @@ async function run() {
       }
 
     })
+
+    app.get('/camps/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await itemCollection2.findOne(query);
+      res.send(result);
+    })
+
+    app.patch('/campss/:id', async (req, res) => {
+      const id = req.params.id
+      const updateInfo = req.body
+      console.log(updateInfo, id)
+      const filter = { _id: new ObjectId(id) };
+      // const options = { upsert: true };
+      const updateDoc = {
+        $set: { ...updateInfo },
+      }
+      const result = await itemCollection2.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+
+    app.delete('/camps/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      try {
+        const result = await itemCollection2.deleteOne(query);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+
+    })
+
+     /* API to search text from title */
+     app.get('/camps-search/:value', async (req, res) => {
+      const text = (req.params.value)
+
+      try {
+        const result = await itemCollection2.find({ 
+          title: new RegExp(text, 'i'),
+          // campFee: new RegExp(text),
+          // startDate:0,
+          loc: new RegExp(text, 'i'),
+          healtCareProf: new RegExp(text, 'i'),
+
+
+          
+        
+        }).toArray();
+        res.send(result)
+      }
+      catch (err) {
+        console.log(err)
+      }
+
+    })
+
+
+
+    // regCamps
+
+    app.post('/regCamps', async (req, res) => {
+      const item = req.body;
+      
+      try {
+        const result = await itemCollection3.insertOne(item);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+    });
+
+    app.get('/regCamps', async (req, res) => {
+      const cursor = itemCollection3.find()
+      try {
+        const result = await cursor.toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
+
+    app.get('/regCamps/:regCampId', async (req, res) => {
+      const regCampId = req.params.regCampId;
+      const query = { regCampId };
+      const result = await itemCollection3.find(query).toArray();
+      res.send(result);
+    })
+
+   
+    
+
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
