@@ -28,27 +28,27 @@ const cookieOptions = {
 
 
 // Verify Token
-const verifyToken=(req, res, next)=>{
-const token = req?.cookie?.token
-// no token
-if(!token){
-  return res.status(401.).send({messsage: "unauthorized access"})
-}
-// if token
-jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
-  if(err){
-    return res.status(401).send({message: "unauthorized access"})
+const verifyToken = (req, res, next) => {
+  const token = req?.cookie?.token
+  // no token
+  if (!token) {
+    return res.status(401.).send({ messsage: "unauthorized access" })
   }
-  req.user = decoded;
-  next()
-})
+  // if token
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "unauthorized access" })
+    }
+    req.user = decoded;
+    next()
+  })
 }
 
 //creating Token
 app.post("/jwt", async (req, res) => {
   const user = req.body;
   console.log("user for token", user);
-  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET,{
+  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: '1d'
   });
   // console.log(token)
@@ -94,7 +94,7 @@ async function run() {
 
     app.post('/camps', async (req, res) => {
       const item = req.body;
-      
+
       try {
         const result = await itemCollection2.insertOne(item);
         res.send(result);
@@ -105,8 +105,9 @@ async function run() {
     });
 
     app.get('/camps', async (req, res) => {
-      const cursor = itemCollection2.find()
+      
       try {
+        const cursor = itemCollection2.find()
         const result = await cursor.toArray();
         res.send(result)
       }
@@ -115,6 +116,51 @@ async function run() {
       }
 
     })
+
+// sorting apis
+    app.get('/mostReg', async (req, res) => {
+
+      try {
+        const cursor = itemCollection2.find().sort({"participantCount": -1})
+        const result = await cursor.toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
+    
+
+    app.get('/camp_fee', async (req, res) => {
+
+      try {
+        const cursor = itemCollection2.find().sort({"campFee": -1})
+        const result = await cursor.toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
+
+    app.get('/Alphabetical_Order', async (req, res) => {
+
+      try {
+        const cursor = itemCollection2.find().sort({"title": 1})
+        const result = await cursor.toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
+
+
+    // Closing of sorting api
+    //      ------------------------------------------
 
     app.get('/camps/:id', async (req, res) => {
       const id = req.params.id;
@@ -150,22 +196,21 @@ async function run() {
 
     })
 
-     /* API to search text from title */
-     app.get('/camps-search/:value', async (req, res) => {
+    /* API to search text from title */
+    app.get('/camps-search/:value', async (req, res) => {
       const text = (req.params.value)
 
       try {
-        const result = await itemCollection2.find({ 
-          title: new RegExp(text, 'i'),
-          // campFee: new RegExp(text),
-          // startDate:0,
-          loc: new RegExp(text, 'i'),
-          healtCareProf: new RegExp(text, 'i'),
-
-
-          
-        
-        }).toArray();
+        const query = {
+          $or: [
+            { title: new RegExp(text, 'i') },
+            { campFee: new RegExp(text)},
+            { startDate: new RegExp(text, 'i') },
+            { loc: new RegExp(text, 'i') },
+            { healtCareProf: new RegExp(text, 'i') },
+          ]
+        }
+        const result = await itemCollection2.find(query).toArray();
         res.send(result)
       }
       catch (err) {
@@ -180,7 +225,7 @@ async function run() {
 
     app.post('/regCamps', async (req, res) => {
       const item = req.body;
-      
+
       try {
         const result = await itemCollection3.insertOne(item);
         res.send(result);
@@ -209,8 +254,8 @@ async function run() {
       res.send(result);
     })
 
-   
-    
+
+
 
 
     // Send a ping to confirm a successful connection
