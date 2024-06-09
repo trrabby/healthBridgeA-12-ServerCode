@@ -10,7 +10,7 @@ const cookieParser = require('cookie-parser');
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", "https://blogging-voyage-a-11.netlify.app", "https://bloggingvoyage-236e6.web.app"
+      "http://localhost:5173"
     ],
     credentials: true,
   })
@@ -72,7 +72,7 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`)
 })
 
-//   const uri = "mongodb://localhost:27017"; 
+  // const uri = "mongodb://localhost:27017"; 
 const uri = `mongodb+srv://${process.env.DB_User}:${process.env.DB_Pass}@cluster0.xygzlb8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -92,6 +92,48 @@ async function run() {
     const itemCollection2 = database.collection("Camps")
     const itemCollection3 = database.collection("regCamps")
 
+    // User related apis
+    app.get('/user', async (req, res) => {
+
+      try {
+        const cursor = itemCollection.find()
+        const result = await cursor.toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
+
+    app.get('/user/:email', async (req, res) => {
+
+      try {
+        const email = req.params.email;
+        const query = { user_email: email };
+        const result = await itemCollection.findOne(query);
+        res.send(result);
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
+
+    app.post('/user', async (req, res) => {
+      const item = req.body;
+      console.log(item)
+
+      try {
+        const result = await itemCollection.insertOne(item);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+    });
+
+    // Camp related apis
     app.post('/camps', async (req, res) => {
       const item = req.body;
 
@@ -105,7 +147,7 @@ async function run() {
     });
 
     app.get('/camps', async (req, res) => {
-      
+
       try {
         const cursor = itemCollection2.find()
         const result = await cursor.toArray();
@@ -117,11 +159,11 @@ async function run() {
 
     })
 
-// sorting apis
+    // sorting apis
     app.get('/mostReg', async (req, res) => {
 
       try {
-        const cursor = itemCollection2.find().sort({"participantCount": -1})
+        const cursor = itemCollection2.find().sort({ "participantCount": -1 })
         const result = await cursor.toArray();
         res.send(result)
       }
@@ -130,12 +172,12 @@ async function run() {
       }
 
     })
-    
+
 
     app.get('/camp_fee', async (req, res) => {
 
       try {
-        const cursor = itemCollection2.find().sort({"campFee": -1})
+        const cursor = itemCollection2.find().sort({ "campFee": -1 })
         const result = await cursor.toArray();
         res.send(result)
       }
@@ -148,7 +190,7 @@ async function run() {
     app.get('/Alphabetical_Order', async (req, res) => {
 
       try {
-        const cursor = itemCollection2.find().sort({"title": 1})
+        const cursor = itemCollection2.find().sort({ "title": 1 })
         const result = await cursor.toArray();
         res.send(result)
       }
@@ -204,7 +246,7 @@ async function run() {
         const query = {
           $or: [
             { title: new RegExp(text, 'i') },
-            { campFee: new RegExp(text)},
+            { campFee: new RegExp(text) },
             { startDate: new RegExp(text, 'i') },
             { loc: new RegExp(text, 'i') },
             { healtCareProf: new RegExp(text, 'i') },
