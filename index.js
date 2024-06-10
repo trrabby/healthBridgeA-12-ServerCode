@@ -1,4 +1,5 @@
-const express = require('express')
+const express = require('express');
+
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const app = express();
@@ -10,7 +11,7 @@ const cookieParser = require('cookie-parser');
 app.use(
   cors({
     origin: [
-      "http://localhost:5173"
+      "http://localhost:5173", "https://healthbridge-3fca1.web.app"
     ],
     credentials: true,
   })
@@ -149,7 +150,7 @@ async function run() {
     app.get('/camps', async (req, res) => {
 
       try {
-        const cursor = itemCollection2.find()
+        const cursor = itemCollection2.find().sort({ _id: -1 })
         const result = await cursor.toArray();
         res.send(result)
       }
