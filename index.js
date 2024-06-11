@@ -201,7 +201,6 @@ async function run() {
 
     })
 
-
     // Closing of sorting api
     //      ------------------------------------------
 
@@ -295,6 +294,20 @@ async function run() {
       const query = { regCampId };
       const result = await itemCollection3.find(query).toArray();
       res.send(result);
+    })
+
+    app.delete('/regCamps/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      try {
+        const result = await itemCollection3.deleteOne(query);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+
     })
 
 
