@@ -296,6 +296,13 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/myRegCamps/:emailOfParticipant', async (req, res) => {
+      const emailOfParticipant = req.params.emailOfParticipant;
+      const query = { emailOfParticipant };
+      const result = await itemCollection3.find(query).toArray();
+      res.send(result);
+    })
+
     app.delete('/regCamps/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
