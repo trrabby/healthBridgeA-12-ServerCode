@@ -7,6 +7,7 @@ require('dotenv').config();
 const port = process.env.PORT || 8000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 app.use(
   cors({
@@ -65,6 +66,25 @@ app.post("/logout", async (req, res) => {
     .send({ success: true });
 });
 
+// create-payment-intent
+app.post('/create-payment-intent', async (req, res) => {
+  console.log(req.body)
+  const price = req.body.price
+  const priceInCent = parseFloat(price) * 100
+  if (!price || priceInCent < 1) return
+  // generate clientSecret
+  const { client_secret } = await stripe.paymentIntents.create({
+    amount: priceInCent,
+    currency: 'usd',
+    // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  })
+  // send client secret as response
+  res.send({ clientSecret: client_secret })
+})
+
 app.get('/', (req, res) => {
   res.send('Server is running')
 })
@@ -73,8 +93,9 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`)
 })
 
-  // const uri = "mongodb://localhost:27017"; 
+// const uri = "mongodb://localhost:27017"; 
 const uri = `mongodb+srv://${process.env.DB_User}:${process.env.DB_Pass}@cluster0.xygzlb8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -92,6 +113,7 @@ async function run() {
     const itemCollection = database.collection("Users");
     const itemCollection2 = database.collection("Camps")
     const itemCollection3 = database.collection("regCamps")
+    const itemCollection4 = database.collection("paymentInfo")
 
     // User related apis
     app.get('/user', async (req, res) => {
@@ -296,12 +318,42 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/regCamps_default/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      try {
+        const result = await itemCollection3.findOne(query);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+
+    })
+
+
     app.get('/myRegCamps/:emailOfParticipant', async (req, res) => {
       const emailOfParticipant = req.params.emailOfParticipant;
       const query = { emailOfParticipant };
       const result = await itemCollection3.find(query).toArray();
       res.send(result);
     })
+
+    app.put('/regCamps_default/:id', async (req, res) => {
+      const id = req.params.id;
+      const doc = req.body;
+      console.log(doc, id)
+
+      const filter = { _id: new ObjectId(id) };
+      // const options = { upsert: true };
+      const updateDoc = {
+        $set: {...doc}
+      }
+      const result = await itemCollection3.updateOne(filter, updateDoc)
+      res.send(result)
+    })
+
 
     app.delete('/regCamps/:id', async (req, res) => {
       const id = req.params.id;
@@ -315,6 +367,61 @@ async function run() {
         console.log(err)
       }
 
+    })
+
+   
+    // Transaction Details
+
+    app.post('/paymentInfo', async (req, res) => {
+      const item = req.body;
+
+      try {
+        const result = await itemCollection4.insertOne(item);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+    });  
+
+    app.get('/paymentInfo', async (req, res) => {
+      const cursor = itemCollection4.find()
+      try {
+        const result = await cursor.toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
+
+    app.get('/paymentInfo/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      try {
+        const result = await itemCollection4.findOne(query);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+
+    })
+
+    app.put('/paymentInfo/:id', async (req, res) => {
+      const id = req.params.id;
+      const doc = req.body;
+      // console.log(doc, id)
+
+      const filter = { _id: new ObjectId(id) };
+      // const options = { upsert: true };
+      const updateDoc = {
+        $set: {...doc}
+      }
+      const result = await itemCollection4.updateOne(filter, updateDoc)
+      res.send(result)
     })
 
 
