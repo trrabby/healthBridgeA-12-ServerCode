@@ -111,9 +111,10 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     const database = client.db("HealthBridge");
     const itemCollection = database.collection("Users");
-    const itemCollection2 = database.collection("Camps")
-    const itemCollection3 = database.collection("regCamps")
-    const itemCollection4 = database.collection("paymentInfo")
+    const itemCollection2 = database.collection("Camps");
+    const itemCollection3 = database.collection("regCamps");
+    const itemCollection4 = database.collection("paymentInfo");
+    const itemCollection5 = database.collection("feedback");
 
     // User related apis
     app.get('/user', async (req, res) => {
@@ -368,6 +369,48 @@ async function run() {
       }
 
     })
+
+    // Feedback
+
+    app.post('/feedback', async (req, res) => {
+      const item = req.body;
+
+      try {
+        const result = await itemCollection5.insertOne(item);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+    });  
+
+    app.get('/feedback', async (req, res) => {
+      const cursor = itemCollection5.find()
+      try {
+        const result = await cursor.toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
+
+    app.get('/feedback/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      try {
+        const result = await itemCollection5.findOne(query);
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+
+    })
+
+
 
    
     // Transaction Details
