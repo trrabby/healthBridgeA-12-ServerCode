@@ -453,12 +453,12 @@ async function run() {
 
     })
 
-    app.put('/paymentInfo/:id', async (req, res) => {
+    app.put('/paymentInfo_up/:id', async (req, res) => {
       const id = req.params.id;
       const doc = req.body;
-      // console.log(doc, id)
+      console.log(doc, id)
 
-      const filter = { _id: new ObjectId(id) };
+      const filter = { keyAfterPayment: id };
       // const options = { upsert: true };
       const updateDoc = {
         $set: {...doc}
@@ -467,6 +467,20 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/paymentInfoBy/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = {emailOfParticipant: email};
+
+      try {
+        const result = await itemCollection4.find(query).toArray();
+        res.send(result);
+      }
+      catch (err) {
+        console.log(err)
+      }
+
+    })
+    
 
 
 
