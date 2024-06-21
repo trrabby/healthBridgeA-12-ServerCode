@@ -141,7 +141,6 @@ async function run() {
       catch (error) {
         console.log(error)
       }
-
     })
 
     app.post('/user', async (req, res) => {
@@ -183,6 +182,36 @@ async function run() {
 
     })
 
+    app.get('/campsDataLengthPagination', async (req, res) => {
+
+      try {
+        const cursor = itemCollection2.find()
+        const result = await cursor.toArray();
+        res.send(result)
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    })
+
+    // ManageCamps Pagination
+    app.get('/campsDataPagination', async (req, res) => {
+
+      // Parse query parameters and ensure they are numbers
+      const page = parseInt(req.query.page) || 0;
+      const size = parseInt(req.query.size) || 10;
+
+      const result = await itemCollection2.find().sort({ _id: -1 })
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+
+      // Send the result back to the client
+      res.send(result);
+
+    })
+
     // sorting apis
     app.get('/mostReg', async (req, res) => {
 
@@ -196,7 +225,6 @@ async function run() {
       }
 
     })
-
 
     app.get('/camp_fee', async (req, res) => {
 
@@ -333,13 +361,55 @@ async function run() {
 
     })
 
+    // myRegCamps for count
+    app.get('/myRegCampsCount/:emailOfParticipant', async (req, res) => {
+      try {
+        // Log the query parameters for debugging
+        console.log(req.query);
 
+        const emailOfParticipant = req.params.emailOfParticipant;
+        const query = { emailOfParticipant };
+        const result = await itemCollection3.find(query).toArray();
+
+        res.send(result);
+      } catch (err) {
+        // Log any errors and send a server error response
+        console.error(err);
+        res.status(500).send({ error: 'An error occurred while fetching data.' });
+      }
+    });
+
+
+    // myRegCamps for pagination
     app.get('/myRegCamps/:emailOfParticipant', async (req, res) => {
-      const emailOfParticipant = req.params.emailOfParticipant;
-      const query = { emailOfParticipant };
-      const result = await itemCollection3.find(query).toArray();
-      res.send(result);
-    })
+      try {
+        // Log the query parameters for debugging
+        console.log(req.query);
+
+        // Parse query parameters and ensure they are numbers
+        const page = parseInt(req.query.page) || 0;
+        const size = parseInt(req.query.size) || 10;
+
+        // Get the email of the participant from the route parameters
+        const emailOfParticipant = req.params.emailOfParticipant;
+
+        // Construct the query
+        const query = { emailOfParticipant };
+
+        // Fetch data from the collection with pagination
+        const result = await itemCollection3.find(query).sort({ _id: -1 })
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+
+        // Send the result back to the client
+        res.send(result);
+      } catch (err) {
+        // Log any errors and send a server error response
+        console.error(err);
+        res.status(500).send({ error: 'An error occurred while fetching data.' });
+      }
+    });
 
     app.put('/regCamps_default/:id', async (req, res) => {
       const id = req.params.id;
@@ -349,7 +419,7 @@ async function run() {
       const filter = { _id: new ObjectId(id) };
       // const options = { upsert: true };
       const updateDoc = {
-        $set: {...doc}
+        $set: { ...doc }
       }
       const result = await itemCollection3.updateOne(filter, updateDoc)
       res.send(result)
@@ -369,6 +439,24 @@ async function run() {
       }
 
     })
+    // ManageAllRegCamps Pagination
+
+     app.get('/regCampsPagination', async (req, res) => {
+
+      // Parse query parameters and ensure they are numbers
+      const page = parseInt(req.query.page) || 0;
+      const size = parseInt(req.query.size) || 10;
+
+      const result = await itemCollection3.find().sort({ _id: -1 })
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+
+      // Send the result back to the client
+      res.send(result);
+
+    })
+
 
     // Feedback
 
@@ -382,7 +470,7 @@ async function run() {
       catch (err) {
         console.log(err)
       }
-    });  
+    });
 
     app.get('/feedback', async (req, res) => {
       const cursor = itemCollection5.find()
@@ -412,7 +500,7 @@ async function run() {
 
 
 
-   
+
     // Transaction Details
 
     app.post('/paymentInfo', async (req, res) => {
@@ -425,7 +513,7 @@ async function run() {
       catch (err) {
         console.log(err)
       }
-    });  
+    });
 
     app.get('/paymentInfo', async (req, res) => {
       const cursor = itemCollection4.find()
@@ -461,7 +549,7 @@ async function run() {
       const filter = { keyAfterPayment: id };
       // const options = { upsert: true };
       const updateDoc = {
-        $set: {...doc}
+        $set: { ...doc }
       }
       const result = await itemCollection4.updateOne(filter, updateDoc)
       res.send(result)
@@ -469,7 +557,7 @@ async function run() {
 
     app.get('/paymentInfoBy/:email', async (req, res) => {
       const email = req.params.email;
-      const query = {emailOfParticipant: email};
+      const query = { emailOfParticipant: email };
 
       try {
         const result = await itemCollection4.find(query).toArray();
@@ -480,7 +568,38 @@ async function run() {
       }
 
     })
-    
+
+    // myPayment for pagination
+    app.get('/paymentInfoByCount/:email', async (req, res) => {
+      try {
+        // Log the query parameters for debugging
+        console.log(req.query);
+
+        // Parse query parameters and ensure they are numbers
+        const page = parseInt(req.query.page) || 0;
+        const size = parseInt(req.query.size) || 10;
+
+        // Get the email of the participant from the route parameters
+        const email = req.params.email;
+
+        // Construct the query
+        const query = { emailOfParticipant: email };
+
+        // Fetch data from the collection with pagination
+        const result = await itemCollection4.find(query).sort({ _id: -1 })
+          .skip(page * size)
+          .limit(size)
+          .toArray();
+
+        // Send the result back to the client
+        res.send(result);
+      } catch (err) {
+        // Log any errors and send a server error response
+        console.error(err);
+        res.status(500).send({ error: 'An error occurred while fetching data.' });
+      }
+    });
+
 
 
 
