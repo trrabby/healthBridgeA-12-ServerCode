@@ -12,7 +12,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", "https://healthbridge-3fca1.web.app"
+      "http://localhost:5173", "https://healthbridge-3fca1.web.app", "https://healthbridgea-12.netlify.app"
     ],
     credentials: true,
   })
@@ -49,7 +49,7 @@ const verifyToken = (req, res, next) => {
 //creating Token
 app.post("/jwt", async (req, res) => {
   const user = req.body;
-  console.log("user for token", user);
+  // console.log("user for token", user);
   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: '1d'
   });
@@ -68,7 +68,7 @@ app.post("/logout", async (req, res) => {
 
 // create-payment-intent
 app.post('/create-payment-intent', async (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   const price = req.body.price
   const priceInCent = parseFloat(price) * 100
   if (!price || priceInCent < 1) return
@@ -265,7 +265,7 @@ async function run() {
     app.patch('/campss/:id', async (req, res) => {
       const id = req.params.id
       const updateInfo = req.body
-      console.log(updateInfo, id)
+      // console.log(updateInfo, id)
       const filter = { _id: new ObjectId(id) };
       // const options = { upsert: true };
       const updateDoc = {
@@ -365,7 +365,7 @@ async function run() {
     app.get('/myRegCampsCount/:emailOfParticipant', async (req, res) => {
       try {
         // Log the query parameters for debugging
-        console.log(req.query);
+        // console.log(req.query);
 
         const emailOfParticipant = req.params.emailOfParticipant;
         const query = { emailOfParticipant };
@@ -384,7 +384,7 @@ async function run() {
     app.get('/myRegCamps/:emailOfParticipant', async (req, res) => {
       try {
         // Log the query parameters for debugging
-        console.log(req.query);
+        // console.log(req.query);
 
         // Parse query parameters and ensure they are numbers
         const page = parseInt(req.query.page) || 0;
@@ -414,7 +414,7 @@ async function run() {
     app.put('/regCamps_default/:id', async (req, res) => {
       const id = req.params.id;
       const doc = req.body;
-      console.log(doc, id)
+      // console.log(doc, id)
 
       const filter = { _id: new ObjectId(id) };
       // const options = { upsert: true };
@@ -544,7 +544,7 @@ async function run() {
     app.put('/paymentInfo_up/:id', async (req, res) => {
       const id = req.params.id;
       const doc = req.body;
-      console.log(doc, id)
+      // console.log(doc, id)
 
       const filter = { keyAfterPayment: id };
       // const options = { upsert: true };
@@ -573,7 +573,7 @@ async function run() {
     app.get('/paymentInfoByCount/:email', async (req, res) => {
       try {
         // Log the query parameters for debugging
-        console.log(req.query);
+        // console.log(req.query);
 
         // Parse query parameters and ensure they are numbers
         const page = parseInt(req.query.page) || 0;
