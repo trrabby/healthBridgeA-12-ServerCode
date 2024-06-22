@@ -475,7 +475,7 @@ async function run() {
     app.get('/feedback', async (req, res) => {
       const cursor = itemCollection5.find()
       try {
-        const result = await cursor.toArray();
+        const result = await cursor.sort({_id: -1}).toArray();
         res.send(result)
       }
       catch (error) {
@@ -544,7 +544,7 @@ async function run() {
     app.put('/paymentInfo_up/:id', async (req, res) => {
       const id = req.params.id;
       const doc = req.body;
-      // console.log(doc, id)
+      console.log(doc, id)
 
       const filter = { keyAfterPayment: id };
       // const options = { upsert: true };
